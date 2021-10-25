@@ -43,8 +43,8 @@ import org.apache.commons.lang3.StringUtils;
 public class Table {
 
   private List<List<String>> table = new ArrayList<>();
-  // private LinkedHashMap<Integer, ArrayList<String>> table =
-  //     new LinkedHashMap<Integer, ArrayList<String>>();
+  private String separator = "|";
+  private String corner = "+";
 
   public Table(InputStream in) {
     Scanner stdin = new Scanner(System.in);
@@ -62,6 +62,38 @@ public class Table {
     }
   }
 
+  public Table(String[] headers) {
+    for (String column : headers) {
+      addToRow(0, column);
+    }
+  }
+
+  public Table(InputStream in, String separator, String corner) {
+    Scanner stdin = new Scanner(System.in);
+    int row = 0;
+    while (stdin.hasNextLine()) {
+      String line = stdin.nextLine();
+      String[] tokens = line.split("\\|");
+      if (tokens.length <= 1) {
+        continue;
+      }
+      for (int i = 0; i < tokens.length; ++i) {
+        this.addToRow(row, tokens[i]);
+      }
+      row++;
+    }
+    this.separator = separator;
+    this.corner = corner;
+  }
+
+  public Table(String[] headers, String separator, String corner) {
+    for (String column : headers) {
+      addToRow(0, column);
+    }
+    this.separator = separator;
+    this.corner = corner;
+  }
+
   public void filterBy(String column, String value) {
     int size = table.size();
     int removed = 0;
@@ -77,16 +109,9 @@ public class Table {
       }
     }
     table = res;
-    // System.out.println(this);
   }
 
   public Integer numRow() { return table.size(); }
-
-  public Table(String... headers) {
-    for (String column : headers) {
-      addToRow(0, column);
-    }
-  }
 
   public void addRow(String... row) {
     int size = table.size();
@@ -147,8 +172,6 @@ public class Table {
     }
     table.get(row).add(entry);
   }
-
-  // public ArrayList<String> get(int i) { return table.get(i); }
 
   public Integer getHeader(String name) {
     for (int i = 0; i < table.get(0).size(); i++) {
