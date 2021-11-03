@@ -31,5 +31,6 @@
 package CLI.src;
 public enum Format {
   FANCY,
-  CVS;
+  CSV,
+  TAB;
 }

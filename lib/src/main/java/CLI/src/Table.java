@@ -45,14 +45,27 @@ public class Table {
   private List<List<String>> table = new ArrayList<>();
   private String separator = "|";
   private String corner = "+";
-  private Format format = Format.FANCY;
+  private Format genformat = Format.FANCY;
+  private Format readformat = Format.FANCY;
 
-  public Table(InputStream in, Format format) {
+  public Table(InputStream in, Format genformat, Format readformat) {
     Scanner stdin = new Scanner(System.in);
     int row = 0;
+    String split = "";
+    switch (readformat) {
+    case TAB:
+      split = "\t";
+      break;
+    case CSV:
+      split = ",";
+      break;
+    case FANCY:
+      split = "\\|";
+      break;
+    }
     while (stdin.hasNextLine()) {
       String line = stdin.nextLine();
-      String[] tokens = line.split("\\|");
+      String[] tokens = line.split(split);
       if (tokens.length <= 1) {
         continue;
       }
@@ -61,17 +74,20 @@ public class Table {
       }
       row++;
     }
-    this.format = format;
+    this.genformat = genformat;
+    this.readformat = readformat;
   }
 
-  public Table(String[] headers, Format format) {
+  public Table(String[] headers, Format genformat, Format readformat) {
     for (String column : headers) {
       addToRow(0, column.trim());
     }
-    this.format = format;
+    this.genformat = genformat;
+    this.readformat = readformat;
   }
 
-  public Table(InputStream in, String separator, String corner, Format format) {
+  public Table(InputStream in, String separator, String corner,
+               Format genformat, Format readformat) {
     Scanner stdin = new Scanner(System.in);
     int row = 0;
     while (stdin.hasNextLine()) {
@@ -87,17 +103,19 @@ public class Table {
     }
     this.separator = separator;
     this.corner = corner;
-    this.format = format;
+    this.genformat = genformat;
+    this.readformat = readformat;
   }
 
   public Table(String[] headers, String separator, String corner,
-               Format format) {
+               Format genformat, Format readformat) {
     for (String column : headers) {
       addToRow(0, column);
     }
     this.separator = separator;
     this.corner = corner;
-    this.format = format;
+    this.genformat = genformat;
+    this.readformat = readformat;
   }
 
   public void filterBy(String column, String value) {
@@ -146,11 +164,21 @@ public class Table {
     return result.toString();
   }
 
-  private String formatRowCVS(List<String> row) {
+  private String formatRowCSV(List<String> row) {
     StringBuilder result = new StringBuilder();
     for (int i = 0; i < row.size(); i++) {
       result.append(row.get(i));
       result.append(",");
+    }
+    result.append("\n");
+    return result.toString();
+  }
+
+  private String formatRowTAB(List<String> row) {
+    StringBuilder result = new StringBuilder();
+    for (int i = 0; i < row.size(); i++) {
+      result.append(row.get(i));
+      result.append("\t");
     }
     result.append("\n");
     return result.toString();
@@ -171,19 +199,23 @@ public class Table {
 
   public String toString() {
     StringBuilder result = new StringBuilder();
-    switch (format) {
-    case CVS:
-      result.append(formatRowCVS(table.get(0)));
+    switch (genformat) {
+    case CSV:
+      result.append(formatRowCSV(table.get(0)));
       for (int row = 1; row < table.size(); row++) {
-        result.append(formatRowCVS(table.get(row)));
+        result.append(formatRowCSV(table.get(row)));
       }
-      result.append(formatRule());
+      return result.toString();
+    case TAB:
+      result.append(formatRowTAB(table.get(0)));
+      for (int row = 1; row < table.size(); row++) {
+        result.append(formatRowTAB(table.get(row)));
+      }
       return result.toString();
     default:
       result.append(formatRule());
       result.append(formatRowFancy(table.get(0)));
       result.append(formatRule());
-
       for (int row = 1; row < table.size(); row++) {
         result.append(formatRowFancy(table.get(row)));
       }
