@@ -64,7 +64,7 @@ public class Table {
 
   public Table(String[] headers) {
     for (String column : headers) {
-      addToRow(0, column);
+      addToRow(0, column.trim());
     }
   }
 
