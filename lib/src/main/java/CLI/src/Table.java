@@ -45,8 +45,9 @@ public class Table {
   private List<List<String>> table = new ArrayList<>();
   private String separator = "|";
   private String corner = "+";
+  private Format format = Format.FANCY;
 
-  public Table(InputStream in) {
+  public Table(InputStream in, Format format) {
     Scanner stdin = new Scanner(System.in);
     int row = 0;
     while (stdin.hasNextLine()) {
@@ -60,15 +61,17 @@ public class Table {
       }
       row++;
     }
+    this.format = format;
   }
 
-  public Table(String[] headers) {
+  public Table(String[] headers, Format format) {
     for (String column : headers) {
       addToRow(0, column.trim());
     }
+    this.format = format;
   }
 
-  public Table(InputStream in, String separator, String corner) {
+  public Table(InputStream in, String separator, String corner, Format format) {
     Scanner stdin = new Scanner(System.in);
     int row = 0;
     while (stdin.hasNextLine()) {
@@ -84,14 +87,17 @@ public class Table {
     }
     this.separator = separator;
     this.corner = corner;
+    this.format = format;
   }
 
-  public Table(String[] headers, String separator, String corner) {
+  public Table(String[] headers, String separator, String corner,
+               Format format) {
     for (String column : headers) {
       addToRow(0, column);
     }
     this.separator = separator;
     this.corner = corner;
+    this.format = format;
   }
 
   public void filterBy(String column, String value) {
@@ -129,12 +135,22 @@ public class Table {
     return maxSize;
   }
 
-  private String formatRow(List<String> row) {
+  private String formatRowFancy(List<String> row) {
     StringBuilder result = new StringBuilder();
     result.append(" ");
     for (int i = 0; i < row.size(); i++) {
       result.append(StringUtils.center(row.get(i), getMaxSize(i) + 2));
       result.append("|");
+    }
+    result.append("\n");
+    return result.toString();
+  }
+
+  private String formatRowCVS(List<String> row) {
+    StringBuilder result = new StringBuilder();
+    for (int i = 0; i < row.size(); i++) {
+      result.append(row.get(i));
+      result.append(",");
     }
     result.append("\n");
     return result.toString();
@@ -155,15 +171,25 @@ public class Table {
 
   public String toString() {
     StringBuilder result = new StringBuilder();
-    result.append(formatRule());
-    result.append(formatRow(table.get(0)));
-    result.append(formatRule());
+    switch (format) {
+    case CVS:
+      result.append(formatRowCVS(table.get(0)));
+      for (int row = 1; row < table.size(); row++) {
+        result.append(formatRowCVS(table.get(row)));
+      }
+      result.append(formatRule());
+      return result.toString();
+    default:
+      result.append(formatRule());
+      result.append(formatRowFancy(table.get(0)));
+      result.append(formatRule());
 
-    for (int row = 1; row < table.size(); row++) {
-      result.append(formatRow(table.get(row)));
+      for (int row = 1; row < table.size(); row++) {
+        result.append(formatRowFancy(table.get(row)));
+      }
+      result.append(formatRule());
+      return result.toString();
     }
-    result.append(formatRule());
-    return result.toString();
   }
 
   public void addToRow(int row, String entry) {
