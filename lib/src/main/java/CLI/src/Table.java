@@ -56,7 +56,7 @@ public class Table {
         continue;
       }
       for (int i = 0; i < tokens.length; ++i) {
-        this.addToRow(row, tokens[i]);
+        this.addToRow(row, tokens[i].trim());
       }
       row++;
     }
