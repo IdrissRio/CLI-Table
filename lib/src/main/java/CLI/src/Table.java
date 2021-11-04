@@ -135,6 +135,10 @@ public class Table {
     table = res;
   }
 
+  public String getElement(int row, String column) {
+    return table.get(row).get(this.getHeader(column));
+  }
+
   public Integer numRow() { return table.size(); }
 
   public void addRow(String... row) {
@@ -241,4 +245,6 @@ public class Table {
     System.exit(1);
     return 0;
   }
+
+  public int getNumberRow() { return table.size(); }
 }
