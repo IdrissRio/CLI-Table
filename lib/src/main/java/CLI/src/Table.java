@@ -135,7 +135,7 @@ public class Table {
     table = res;
   }
 
-  public String getElement(int row, String column) {
+  public String getElementRowColumn(int row, String column) {
     return table.get(row).get(this.getHeader(column));
   }
 
